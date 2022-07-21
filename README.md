@@ -22,6 +22,7 @@ To use this you will need a few api keys.
 ## Details & Caveats
 
 This program makes a twitch API call every 30 minutes. If the hosting machine goes offline it will stop making calls and if twitch dies it will probably stop working.
+
 ---
 ## Support
 
