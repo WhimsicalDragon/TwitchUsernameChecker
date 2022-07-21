@@ -7,7 +7,7 @@ This is a simple python program that check if a twitch username is avalible ever
 
 WhimsicalDragon1337 [Twitter](https://twitter.com/Whimsical1337)
 This was made specifically for Miu: [Twitch](https://www.twitch.tv/miwupy) [Twitter](https://twitter.com/Miwupy). If you'd like to commission me for a code project you can reach out to me on twitter!
-You could've watched me code this live at on [Twitch](https://www.twitch.tv/whimsicaldragon1337) ~~if my internet had been working when I was coding this~~
+You could've watched me code this live at [Twitch](https://www.twitch.tv/whimsicaldragon1337) ~~if my internet had been working when I was coding this~~
 
 ---
 ## Usage
