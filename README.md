@@ -1,4 +1,4 @@
-# Twitch SMS Notifications
+# Twitch Username Checker
 
 This is a simple python program that check if a twitch username is available every half hour.
 

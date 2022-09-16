@@ -9,7 +9,7 @@ CID = config.CID
 CS = config.CS
 
 #Less sensitive data
-CHANNEL = "WhimsicalDragon1337"
+CHANNEL = "Miwu"
  
 def revokeToken(CID):
     global TOKEN
