@@ -111,29 +111,33 @@ global checkCount
 checkCount = 0
 
 webhook.pushDiscordMessage("Startup: :white_check_mark:")
+try:
+    while(existCheck(CID,CS) == False) :
+        checkCount = checkCount + 1
+        print("Rechecking in a half hour")
+        webhook.pushDiscordMessage("Rechecking in a half hour.\nCurrently checking the name: " + CHANNEL + "\nTotal # of checks so far: " + str(checkCount))
+        sleep(1800)
+        #You can check more frequently than this if you want, but a half hour is really all that's needed.
 
-while(existCheck(CID,CS) == False) :
-    checkCount = checkCount + 1
-    print("Rechecking in a half hour")
-    webhook.pushDiscordMessage("Rechecking in a half hour.\nCurrently checking the name: " + CHANNEL + "\nTotal # of checks so far: " + str(checkCount))
-    sleep(1800)
-    #You can check more frequently than this if you want, but a half hour is really all that's needed.
+        # Validation is not required since this is for an app
+        #If we want to run this on a twitch account validation is required...
+        """
+        r = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers) 
 
-    # Validation is not required since this is for an app
-    #If we want to run this on a twitch account validation is required...
-    """
-    r = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers) 
-
-    if r.status_code == 401:
-        #Reup and retry...
-        genToken(CID,CS)
-        r = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers)
         if r.status_code == 401:
-            print("Token cannot be validated. Exiting")
-            revokeToken(CID)
-            exit(1)
-    """
+            #Reup and retry...
+            genToken(CID,CS)
+            r = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers)
+            if r.status_code == 401:
+                print("Token cannot be validated. Exiting")
+                revokeToken(CID)
+                exit(1)
+        """
 
-revokeToken(CID)
+    revokeToken(CID)
 
-webhook.pushDiscordMessage("Tokens revoked: :white_check_mark: \nShutting down....")
+    webhook.pushDiscordMessage("Tokens revoked: :white_check_mark: \nShutting down....")
+finally:
+    revokeToken(CID)
+
+    webhook.pushDiscordMessage("Tokens revoked: :white_check_mark: \nShutting down....")
