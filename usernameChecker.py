@@ -85,6 +85,32 @@ def existCheck(CID,CS):
         return False #The specified channel does exist!
 
 
+def validateToken():
+    global TOKEN
+
+    headers = {
+    'Authorization': 'OAuth ' + TOKEN,
+}
+
+    r = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers) 
+
+    if r.status_code == 401:
+        #Reup and retry...
+        try:
+            revokeToken(CID)
+        except:
+            print("Couldn't revoke token, likely because it is already invalid")
+        genToken(CID,CS)
+        r = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers)
+        if r.status_code == 401:
+            print("Token cannot be validated. Exiting.....")
+            webhook.pushDiscordMessage("Issue with token validation.\nShutting down....")
+            revokeToken(CID)
+            exit(1)
+    else:
+        print("Validation succesful!")
+
+
 def genToken(CID,CS):
     global TOKEN
     headers = {
@@ -98,6 +124,9 @@ def genToken(CID,CS):
     print(resp.json())
 
     TOKEN = resp.json()["access_token"]
+
+    validateToken()
+
     return TOKEN
 
 #End functions
@@ -116,23 +145,12 @@ try:
         checkCount = checkCount + 1
         print("Rechecking in a half hour")
         webhook.pushDiscordMessage("Rechecking in a half hour.\nCurrently checking the name: " + CHANNEL + "\nTotal # of checks so far: " + str(checkCount))
-        sleep(1800)
+        sleep(120)
         #You can check more frequently than this if you want, but a half hour is really all that's needed.
 
         # Validation is not required since this is for an app
         #If we want to run this on a twitch account validation is required...
-        """
-        r = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers) 
-
-        if r.status_code == 401:
-            #Reup and retry...
-            genToken(CID,CS)
-            r = requests.get("https://id.twitch.tv/oauth2/validate", headers=headers)
-            if r.status_code == 401:
-                print("Token cannot be validated. Exiting")
-                revokeToken(CID)
-                exit(1)
-        """
+        validateToken()
 
     revokeToken(CID)
 
