@@ -10,8 +10,17 @@ CID = config.CID
 CS = config.CS
 
 #Less sensitive data
-CHANNEL = "Miwu"
- 
+
+CHANNELS = ["Miwu","Miumi"] #Put the channel names you want in here
+CHANNELS_READABLE = " & ".join(CHANNELS)
+CHANNELS = [x.lower() for x  in CHANNELS]
+CHANNEL_REQ_LIST = ""
+
+for i in CHANNELS:
+    CHANNEL_REQ_LIST = CHANNEL_REQ_LIST + "login=" + i + "&"
+CHANNEL_REQ_LIST = CHANNEL_REQ_LIST.rstrip(CHANNEL_REQ_LIST[-1]) #Get rid of trailling &
+
+
 def revokeToken(CID):
     global TOKEN
 
@@ -42,7 +51,13 @@ def existCheck(CID,CS):
     'Client-Id': CID,
     }
 
-    r = requests.get('https://api.twitch.tv/helix/users?login=' + CHANNEL, headers=headers)
+    print(CHANNEL_REQ_LIST)
+    r = requests.get('https://api.twitch.tv/helix/users?' + CHANNEL_REQ_LIST, headers=headers)
+
+    print(r.json())
+    print(len(r.json()['data']))
+
+    #raise Exception("Testing!")
 
     if r.status_code == 401:
         
@@ -50,7 +65,7 @@ def existCheck(CID,CS):
         revokeToken(CID)
         genToken(CID,CS)
 
-        r = requests.get('https://api.twitch.tv/helix/users?login=' + CHANNEL, headers=headers)
+        r = requests.get('https://api.twitch.tv/helix/users?login=' + CHANNEL_REQ_LIST, headers=headers)
         if r.status_code == 401:
             print("Issue with token")
             webhook.pushDiscordMessage("Issue with twitch token!")
@@ -67,22 +82,31 @@ def existCheck(CID,CS):
         exit()
 
 
-    if (r.json()['data']) == [] :
+    if (len(r.json()['data'])) < len(CHANNELS) :
 
-        r = requests.get("https://passport.twitch.tv/usernames/" + CHANNEL)
+        CHECKCHANNELS = CHANNELS
 
-        if r.text == '' and r.status_code == 204:
-            print("I am very confident that the name " +  CHANNEL + " is not currently in use")
-            webhook.pushDiscordMessage("I am very confident that the name " +  CHANNEL + " is not currently in use!!!!!!!!!")
-        else:
-            print("I am pretty sure that the name " +  CHANNEL + " is not currently in use")
-            webhook.pushDiscordMessage("I am pretty sure that the name " +  CHANNEL + " is not currently in use!!!")
+        for i in (r.json()['data']):
 
-        return True #The specified channel does not exist!
+            if i['login'] in CHECKCHANNELS:
+                CHECKCHANNELS.remove(i['login'])
+        print(CHECKCHANNELS)
+
+        for i in CHECKCHANNELS:
+            r = requests.get("https://passport.twitch.tv/usernames/" + i) #This request will ONLY accept 1 username at a time!!!
+
+            if r.text == '' and r.status_code == 204:
+                print("I am very confident that the name " +  i + " is not currently in use")
+                webhook.pushDiscordMessage("<@User> I am very confident that the name " +  i + " is not currently in use!!!!!!!!!")
+            else:
+                print("I am pretty sure that the name " +  i + " is not currently in use")
+                webhook.pushDiscordMessage("<@User> I am pretty sure that the name " +  i + " is not currently in use!!!")
+
+        return True #A specified channel does not exist!
     else:
         print("They still exist :(")
-        webhook.pushDiscordMessage("The name " + CHANNEL + " is currently in use")
-        return False #The specified channel does exist!
+        webhook.pushDiscordMessage("The names " + CHANNELS_READABLE + " are currently in use")
+        return False #The specified channels do exist!
 
 
 def validateToken():
@@ -139,13 +163,13 @@ genToken(CID,CS)
 global checkCount
 checkCount = 0
 
-webhook.pushDiscordMessage("Startup: :white_check_mark:")
+webhook.pushDiscordMessage("Startup: :white_check_mark:" + "\nƐ>--------------------------<3")
 try:
     while(existCheck(CID,CS) == False) :
         checkCount = checkCount + 1
         print("Rechecking in a half hour")
-        webhook.pushDiscordMessage("Rechecking in a half hour.\nCurrently checking the name: " + CHANNEL + "\nTotal # of checks so far: " + str(checkCount))
-        sleep(120)
+        webhook.pushDiscordMessage("Rechecking in a half hour.\nCurrently checking the names: " + CHANNELS_READABLE + "\nTotal # of checks so far: " + str(checkCount) + "\nƐ>--------------------------<3")
+        sleep(1800)
         #You can check more frequently than this if you want, but a half hour is really all that's needed.
 
         # Validation is not required since this is for an app
@@ -155,7 +179,7 @@ try:
     revokeToken(CID)
 
     webhook.pushDiscordMessage("Tokens revoked: :white_check_mark: \nShutting down....")
-finally:
+except:
     revokeToken(CID)
 
     webhook.pushDiscordMessage("Tokens revoked: :white_check_mark: \nShutting down....")
