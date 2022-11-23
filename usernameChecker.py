@@ -51,13 +51,7 @@ def existCheck(CID,CS):
     'Client-Id': CID,
     }
 
-    print(CHANNEL_REQ_LIST)
     r = requests.get('https://api.twitch.tv/helix/users?' + CHANNEL_REQ_LIST, headers=headers)
-
-    print(r.json())
-    print(len(r.json()['data']))
-
-    #raise Exception("Testing!")
 
     if r.status_code == 401:
         
